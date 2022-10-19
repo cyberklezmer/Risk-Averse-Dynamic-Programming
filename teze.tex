@@ -1,19 +1,21 @@
 %% LyX 2.3.4.2 created this file.  For more info, see http://www.lyx.org/.
 %% Do not edit unless you really know what you are doing.
 %\documentclass[english]{article}
-\documentclass[preprint,12pt,authoryear]{elsarticle}
+\documentclass[preprint,10pt]{elsarticle}
 
-\usepackage{lineno,hyperref}
+\usepackage{hyperref}
 \usepackage[latin9]{inputenc}
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{amssymb}
 \usepackage{algpseudocode}
+\usepackage{framed}
 \usepackage{xcolor, colortbl}
-\modulolinenumbers[5]
+%\usepackage{lineno}
+%\modulolinenumbers[5]
 
-\journal{Operations Research Letters}
-
+%\journal{Operations Research Letters}
+\journal{Arxiv}
 %%%%%%%%%%%%%%%%%%%%%%%
 %% Elsevier bibliography styles
 %%%%%%%%%%%%%%%%%%%%%%%
@@ -106,7 +108,7 @@
 
 \begin{frontmatter}
 
-\title{Risk Averse Dynamic Programming with infinite horizon}
+\title{Contractivity of Bellman Operator in Risk Averse Dynamic Programming with Infinite Horizon}
 %\tnotetext[mytitlenote]{Fully documented templates are available in the elsarticle package on \href{http://www.ctan.org/tex-archive/macros/latex/contrib/elsarticle}{CTAN}.}
 
 %% Group authors per affiliation:
@@ -126,8 +128,7 @@
 %\address[mysecondaryaddress]{360 Park Avenue South, New York}
 
 \begin{abstract}
-The paper deals with risk averse dynamic programming problem with infinite horizon. First, the required assumptions are formulated to have the problem well defined. Then the Bellman equation is derived, which may be also seen as a standalone reinforcement learning problem. The fact that the Bellman operator is contraction is proved, guaranteeing convergence of value iteration algorithm. 
-Finally, the situation when the time between decision points converges to zero, is studied. In particular, it is numerically demonstrated on the problem of optimal trading that scaling  the CVaR risk measure similar to that proposed by Pichler and Schlotter (2020) gives non-degenerate optimal policies with the inter-decision interval approaching zero.
+The paper deals with a risk averse dynamic programming problem with infinite horizon. First, the required assumptions are formulated to have the problem well defined. Then the Bellman equation is derived, which may be also seen as a standalone reinforcement learning problem. The fact that the Bellman operator is contraction is proved, guaranteeing convergence of various solution algorithms used for dynamic programming as well as reinforcement learning problems, which we demonstrate on the value iteration algorithm.
 \end{abstract}
 
 \begin{keyword}
@@ -136,88 +137,181 @@ risk aversion \sep dynamic programming \sep infinite horizon
 \end{keyword}
 
 \end{frontmatter}
-
+%\end{document}
 \linenumbers
 
 \section{Introduction}
+Risk averse variants of Dynamic Programming are widely studied. Our work is very close to \cite{ruszczynski2010risk} who, for a very similar setting, proves the convergence of the Value Iteration algorithm. The contribution of our work is two-fold. First, instead of complicated axiomatic definition, we defined the one-stage risk mapping constructively by means of its risk envelope, which is moreover independent of a choice of an underlying probability measure; consequently, the whole exposition, including proofs, is much simpler. Second, instead of the convergence of a particular solution algorithm, we prove the contractive property of the Bellman operator, which can be then plugged into convergence proofs of many different algorithms.    
+
 Let $(\Omega, \F, P)$
-be a probability space and $\mathbf{F} := (\F_0, . . . ,\F_t,...)$
-be a filtration, i.e. a sequence of increasing sigma algebras: $\F_0 \subset \F_1 \subset ... \subset \F $
+be a probability space and let $\mathbf{F} := (\F_0, . . . ,\F_t,...)$
+be a filtration, i.e. a sequence of increasing sigma algebras: $\F_0 \subset \F_1 \subset ... \subset \F$.
 Consider a process
-$\left\{Z_t\right\}, t = 0,1,...,$  adapted to the filtration $\mathbf{F}$.
-For such a process in time $t$ we use a coherent conditional risk measure: $\sigma_{t|\F_{t-1}}(Z_t)$. By saying that a conditional risk measure is coherent we mean it is monotonous ($\sigma_{t|\F_{t-1}}(X)\geq \sigma_{t|\F_{t-1}}(Y)$ for any random variables $X\geq Y$), \textcolor{red}{sub-additive ($\sigma_{t|\F_{t-1}}(X+Y) \leq \sigma_{t|\F_{t-1}}(X) + \sigma_{t|\F_{t-1}}(Y)$ for any random variables $X,Y$)}
-translation invariant ($\sigma_{t|\F_{t-1}}(X+C))=$\sigma_{t|\F_{t-1}}(X)+C$ for any $C \in \F_{t-1}$) and positively homogenous ($\sigma_{t|\F_{t-1}}(\Lambda X))=\Lambda \sigma_{t|\F_{t-1}}(X)$ for any $\Lambda \in \sigma(\F_{t-1})$).
-Then we construct a nested risk measure $\rho_t$ as follows:
-$$ \rho_t(Z_t) = \textcolor{red}{\sigma_{1|\F_{0}}(\sigma_{2|\F_{1}}(...\sigma_{t|\F_{t-1}}(Z_t)))}.$$ This nested measure is coherent, too. We will be interested in the limit version of this measure 
+$\left\{Z_t\right\}, t = 0,1,...,$  adapted to the filtration $\mathbf{F}$, specifically $Z_t \in L_2(\F_t),  t = 0,1,...,$ %for some $p\in[1,\infty]$
+.
+For such a process in time $t$ we use coherent conditional risk measures: $\sigma_{t|\F_{t-1}}(Z_t)$, $t>0$. By saying that a conditional risk measure is coherent we mean it is \textcolor{black}{measurable,} monotonous ($\sigma_{t|\F_{t-1}}(X)\geq \sigma_{t|\F_{t-1}}(Y)$ for any random variables $X\geq Y$, $X,Y\in L_2$), \textcolor{black}{sub-additive ($\sigma_{t|\F_{t-1}}(X+Y) \leq \sigma_{t|\F_{t-1}}(X) + \sigma_{t|\F_{t-1}}(Y)$ for any random variables $X,Y \in L_2$)}
+translation invariant ($\sigma_{t|\F_{t-1}}(X+C))=\sigma_{t|\F_{t-1}}(X)+C$ for any $C \in  L_2(\F_{t-1})$, $X\in L_2$) and positively homogeneous ($\sigma_{t|\F_{t-1}}(\Lambda X))=\Lambda \sigma_{t|\F_{t-1}}(X)$ for any $\Lambda \in L_2(\F_{t-1})$, $X \in L_2$).
+Next we construct a nested risk measure $\rho_t$ as follows:
+$$ \rho_t(Z_t) = \textcolor{black}{\sigma_{1|\F_{0}}(\sigma_{2|\F_{1}}(...\sigma_{t|\F_{t-1}}(Z_t)))}.$$ \textcolor{black}{It can be easily seen that, once $\F_0$ is trivial, $\rho_t(Z_t)$ is deterministic } a coherent risk measure. We will be interested in the limit version of this measure 
 $\rho_{\infty}$ defined as:
 \begin{equation}
-\rho_{\infty}(Z) = \lim_{t\rightarrow \infty} \rho_t(Z_t). 
+\rho_{\infty}(Z) = \lim_{t\rightarrow \infty} \rho_t(Z_t) \qquad
+\textcolor{black}{a.s.}
 \label{rhoinf}
 \end{equation}
 Such a limit, however, may not exist in general and, therefore, we first formulate the sufficient conditions for the existence of $\rho_{\infty}$. 
 \begin{definition}
 \label{def1}
-\textcolor{red}{We say that process $\left\{Z_t\right\}, t = 0,1,...,$ 
-has uniformly bounded support if there exist finite $A < B$ such that  $\supp(Z_t) \subseteq \left\langle A,B \right\rangle$ for all $t$}
+\textcolor{black}{We say that process $\left\{Z_t\right\}, t = 0,1,...,$ 
+has uniformly bounded support if there exist finite $a < b$ such that  $\supp(Z_t) \subseteq \left\langle a,b \right\rangle$ for all $t$.}
 %\textit{converges in support} if $\supp(Z_t)$ is bounded for every $t$
 %and  $\supp(Z_{t+1} - Z_{t}) \rightarrow \{0\}$ where the set convergence is considered in the Painleve-Kuratowski sense.
 \end{definition}
 \begin{definition}
-We say that conditional risk measure $\textcolor{red}{\sigma_{t|\F_{t-1}}}$  is  \textit{support-bounded} if for every random variable $X$ we have $\textcolor{red}{\sigma_{t|\F_{t-1}}(X)} \in \left\langle a,b \right\rangle$,  where $\textcolor{red}{a=\mathrm{essinf}(X)}$ and $\textcolor{red}{b=\mathrm{esssup}(X)}$.
+We say that conditional risk measure $\textcolor{black}{\sigma_{t|\F_{t-1}}}$  is  \textit{support-bounded} if for every $X \in L_2$ we have $\textcolor{black}{\sigma_{t|\F_{t-1}}(X)} \in \left\langle a,b \right\rangle$,  where $\textcolor{black}{a=\mathrm{essinf}(X)}$ and $\textcolor{black}{b=\mathrm{esssup}(X)}$.
 \end{definition}
 
 \begin{theorem}
 Let process
-$\left\{Z_t\right\}, t = 0,1,...,$  be adapted to the filtration $\mathbf{F}$, a.s. non-increasing, and let \textcolor{red}{the process has uniformly bounded support.}
+$\left\{Z_t\right\}, t = 0,1,...,$  be adapted to the filtration $\mathbf{F}$, a.s. non-increasing, and let \textcolor{black}{the process have uniformly bounded support.}
 Assume that a conditional risk measure $\sigma_{t|\F_{t-1}}(Z_t)$ is coherent and support-bounded for all $t$. Then $\rho_{\infty}(Z)$ exists.
+\label{thm:exists}
 \end{theorem}
 \begin{proof}
-\textcolor{red}{%It suffices to show that the sequence ${\rho_t(Z_t)}$, $t=0,1,...$ is non-increasing and uniformly bounded. 
+\textcolor{black}{%It suffices to show that the sequence ${\rho_t(Z_t)}$, $t=0,1,...$ is non-increasing and uniformly bounded. 
 First, thanks to the nested form of $\rho_t$ and the fact that conditional risk measures  $\sigma_{t|\F_{t-1}}$ are support-bounded, we have bounded sequence ${\rho_t(Z_t)}$, $t=0,1,...$. Second,
 \begin{eqnarray*}
 \rho_{t}(Z_{t}) - \rho_{t+1}(Z_{t+1}) &=&  \rho_t(Z_t) - \rho_t(\sigma_{t+1|\F_{t}}(Z_{t+1}))  \\
 &\geq& \rho_t(Z_t) - \rho_t(\sigma_{t+1|\F_{t}}(Z_{t})) \\ &=& \rho_t(Z_t) - \rho_t(Z_t) = 0. 
 \end{eqnarray*}
-where the inequality follows from (i) coherency of $\sigma_{t+1|\F_{t}}$ and (ii) a.s. non-increasing $\left\{Z_t\right\}, t = 0,1,...,$. 
+where the inequality follows from (i) coherency of $\sigma_{t+1|\F_{t}}$ and (ii) \textcolor{black}{the fact that $\left\{Z_t\right\}$ is } a.s. non-increasing, $t = 0,1,...,$. 
 Hence, the sequence ${\rho_t(Z_t)}$, $t=0,1,...$ is non-increasing. Since every bounded non-increasing sequence has a limit, $\rho_{\infty}(Z)$ exists,  which completes the proof.}
 %Since process $\left\{Z_t\right\}, t = 0,1,...,$ converges in support and  $\sigma_{t|\F_{t-1}}(Z_t)$ is support-bounded for all $t$, $\sigma_{T+1|\F_{T}}(Z_{T+1} - Z_{T})$ converges to zero. And, consequently, $\rho_T(\sigma_{T+1|\F_{T}}(Z_{T+1} - Z_{T}))$ converges to zero because $\rho_T$ is a coherent risk measure, what completes the proof.}
 \end{proof}
-\section{Convergence of Value iteration algorithm}
+\noindent For the majority of practical situations, it suffices to assume $\Omega = [0,1] \times [0,1] \times \dots$ and $P=U(0,1)\otimes U(0,1)\otimes \dots$ where $U$ is uniform distribution; indeed, any process can be made Markov by adding its history to the state space and any coordinate of a Markov process can be expressed as a function of the past and an uniform variable (see \cite{kallenberg2001foundations}, Chp. 8).
+
+It is well known (see \cite{ang2018dual}) that every coherent risk measure $\sigma$ can be expressed in a dual form: 
+$\sigma(X)=\sup_{Q\in{\mathcal M}}\int X(\omega) Q(\omega)P(d\omega)$, where ${\mathcal M}=\{Q \in L_2: Q \geq 0, \E_P(Q)=1,\E_P(XQ)\leq \sigma(X),X\in L_2\}$  
+is  a set of probability distributions known as risk envelope.
+%dependent on $P$.
+%with $\frac{1}{p}+\frac{1}q=1$. 
+Especially, if $P=U(0,1)$, then $\sigma(X)=\sup_{Q\in{\mathcal M}'}\int_0^1 q_X(\omega) Q(\omega)d\omega$ where ${\mathcal M}'$ is a (different) risk envelope and $q_X$ is a quantile function of $X$.
+
+Clearly, as conditional risk measures become coherent risk measures once the conditioning random element is fixed, it can be expressed by means of a dual representation too. Therefore, we further define $\sigma_{t|\F_{t-1}}$ by means of this representation; however, we do not allow the risk envelope to depend on $t$ and we do not allow it to be random: 
+\begin{equation}
+\sigma_{t|\F_{t-1}}(X)=\Sigma(\L(X|\F_{t-1})),\quad t\geq 1,
+\qquad 
+\Sigma(P)=\sup_{Q\in\mathcal{M}}\int_0^1
+q_P(x) Q(x) dx,
+\label{eq:homog}
+\end{equation} 
+where $\mathcal{M}$ is a deterministic risk envelope and $q_P$ is a quantile function corresponding to $P$. In practice this means that all the conditional measures are "of the same type", e.g. once $\sigma_{t|\F_{t-1}}$ is a conditional CVaR with risk level $\alpha$, then all the other conditional measures have to be conditional CVaRs with level $\alpha$, too.
+
+Later we shall use the following Proposition.
+\begin{proposition}\label{prop:homog}
+Assume (\ref{eq:homog}). Let  $\F_0$ be trivial (implying that $Z_0$ is deterministic) and let 
+\begin{equation}
+\label{eq:eps}    
+0 \leq Z_{t+1}-Z_t \leq \epsilon_t, \qquad t\geq 0,
+\end{equation}
+where $\epsilon_t$ is deterministic with $\sum_t \epsilon_t$ finite. Then $\rho_\infty$ exists and
+$$
+\rho_\infty(Z) = Z_0 + \sigma(\rho_\infty(Z')),
+$$
+where $Z'_t = Z_{t+1}-Z_0,t\geq 0$ and $\sigma(X) = \Sigma({\mathcal L}(X))$ ( see (\ref{eq:homog})).
+\end{proposition} 
+\noindent Note that $\sigma$ is unconditional coherent risk measure. First we prove the following Lemma:
+\begin{lemma} (i) Let $Z_0$ be bounded and let  (\ref{eq:eps}) hold. Let $\sigma_{t|\F_{t-1}}(Z_t)$ be defined by (\ref{eq:homog}) and support-bounded for all $t$.
+Then
+$\rho_\infty(Z)$ exists and 
+the convergence in (\ref{rhoinf}) is uniform in max norm.\\
+(ii) Any coherent risk measure is continuous with respect to uniform convergence in max norm. 
+\label{lem:cauchy}
+\end{lemma}
+\begin{proof}[Proof of Lemma] (i) Clearly, $Z_t$ fulfills the assumptions of Theorem \ref{thm:exists}, so $\rho_\infty(Z)$ exists. 
+For any $t > 0$ and $s >0$, knowing that $\rho_t(Z_t)$ is non-decreasing, we have $$0 \leq \rho_{t+s}(Z_{t+s})-\rho_t(Z_t) \leq \rho_{t+s}(Z_t + e_t) - \rho_t(Z_{t}) = 
+\rho_{t}(Z_t + e_t) - \rho_t(Z_{t}) = e_t 
+$$
+where $e_t=\sum_{\tau \geq t} \epsilon_\tau$.
+\\
+(ii) Let $Z_t \rightarrow Z^\star$ uniformly. Then there exists a sequence $e_t$ such that
+$
+Z^\star - e_t \leq Z_t \leq Z^\star + e_t$,
+so, by coherence,
+$\sigma(Z^\star) - e_t\leq \sigma(Z_t) \leq \sigma(Z^\star) + e_t
+$ implying $\sigma(Z_t)\rightarrow \sigma(Z^\star)$.
+\end{proof}
+
+\begin{proof}[Proof of the Proposition] Thanks to Theorem \ref{thm:exists}, the limit defining the l.h.s. exists. From the definition and the coherence
+$$
+\rho_{\infty}(Z) = \lim_{t\rightarrow \infty} \rho_t(Z_t) = Z_0 + \lim_{t\rightarrow \infty} (\sigma(S_t))
+$$
+where $S_0=0$ and $$S_t = \sigma_{2|\F_1}(\dots\sigma_{t|\F_{t-1}}(Z'_{t-1})\dots)= \Sigma(\L(\Sigma(\dots\Sigma(\L(Z'_{t-1}|\F_{t-1})\dots)|\F_0)),$$ $t\geq 0$. By Lemma \ref{lem:cauchy} (i), $S_{t}$ converges uniformly to $\rho_\infty(Z')$, so, by (ii) of the same Lemma,
+$
+\lim_{t\rightarrow \infty} (\sigma(S_t))=\sigma(\lim_{t\rightarrow \infty}S_t)
+=\sigma(\rho_\infty(Z')).
+$
+\end{proof}
+
+\section{Contractiveness of the Bellman Operator}
 Consider a dynamic programming problem
 \[
-\sup_{a\in {\mathcal A},s_{t+1}=T(s_{t},a_{t},W_{t+1}),t\geq 0}\varrho_\infty(\sum_{t=0}^{\infty}\gamma^{t}r(s_{t},a_{t})),
+V(s_0) := \sup_{a_t\in A(s_t), s_{t+1}=T(s_{t},a_{t},W_{t+1}),t\geq 0}\varrho_\infty(\sum_{t=0}^{\infty}\gamma^{t}r(s_{t},a_{t})),
 \]
 Here,
 \begin{itemize}
-\item $T : S \times A \times X \rightarrow S$ is a measurable mapping, where $S$ is a (measurable) state space, $A$ is a (measurable) action space and $X$ is a measurable space
-\item $W_{t} \in B$ is a Markov stochastic process (we may assume that it is i.i.d., because
-every Markov process $X$ can be expressed as $X_{t}=f_{t}(X_{t-1},W_{t})$
-where $f_t$ are suitable measurable functions, TBD cite Kallenberg).
-\item $r$ is a \textcolor{red}{uniformly bounded non-negative function}
+\item $T : S \times A \times X \rightarrow S$ is a measurable mapping, where $S$ is a complete state space, $A$ is a (measurable) action space and $X$ is a measurable space
+\item $W_{t} \in X$ is a Markov stochastic process (we may assume that it is i.i.d. uniform (see above)).
+\item $r$ is a \textcolor{black}{uniformly bounded non-negative function}
 \item $\varrho_\infty(Z) = -\rho_\infty(-Z)$, where $\rho_\infty$ is a limit nested risk measure (\ref{rhoinf}) defined by filtration $\F_{t}\defined\sigma(W_{t})$
-and a family of coherent support-bounded conditional risk measure $\sigma_{t|\F_{t-1}}$ which we, w.l.o.g., assume to fulfill $\sigma_{t|\F_{t-1}}(\bullet)=\sigma_{s_{t-1}}(\bullet)$ for some family $\sigma_\bullet$ of coherent risk measures, TBD cite Kallenberg.
-\item $\gamma<1$
-\item ${\mathcal A}$ is an action space, subset of the space of stochastic processes taking values in $A$.
+and a support-bounded coherent risk measure $\sigma$ as in (\ref{eq:homog}).
+\item $\gamma<1$ is a discount factor
+\item $A(\bullet): S \rightarrow A$ is a set mapping.
 \end{itemize}
 
-Since $r$ is uniformly bounded non-negative and $\gamma<1$, process $-Z_T \defined \sum_{t=0}^{T}\gamma^{t}r_{t}(s_{t},a_{t}),$ $T = 0,1,...,$, has \textcolor{red}{uniformly bounded support and is non-increasing.} Combined with the assumption of coherent support-bounded conditional risk measure $\sigma_s$, it guarantees  existence of $\varrho_\infty$. Hence, the problem is well defined. 
-As usually in dynamic programming, we get Bellman equation in the following form:
+\noindent Since $r$ is uniformly bounded non-negative and $\gamma<1$, process $-Z_T \defined \sum_{t=0}^{T}\gamma^{t}r_{t}(s_{t},a_{t}),$ $T = 0,1,...,$, has \textcolor{black}{uniformly bounded support and is non-increasing.} Combined with the assumption of coherent support-bounded conditional risk measure $\sigma$, it guarantees  existence of $\varrho_\infty$. Hence, the problem is well defined. 
+
+\begin{proposition} (Bellman Equation)
 \begin{equation}
-V(s)=\sup_{a\in A(s)}[r(s,a)+\gamma\varsigma_s(V(T(s,a,W))].
+V(s)=\sup_{a\in A(s)}[r(s,a)+\gamma\varsigma(V(T(s,a,W))],\qquad s \in S,
 \label{eq:bellman}
 \end{equation}
-where $\varsigma_s(Z)=-\sigma_s(-Z)$.
+where $\varsigma(Z)=-\sigma(-Z)$.
+\end{proposition}
 
-\begin{proposition}
-Let $\varsigma_\bullet \equiv \varsigma$, i.e. is not dependent on $s$. The operator 
+\noindent Note that (\ref{eq:bellman}) may be also understood as a definition of a risk-averse version of  a reinforcement learning problem (see \cite{sutton2018reinforcement}).
+
+\begin{proof}
+Thanks to Proposition \ref{prop:homog}, basic properties of supremum, and Lemma \ref{lem:cauchy} (ii), we get, for any $s_0 \in S$: 
+\begin{multline*}
+V(s_0) = \sup_{a_t\in A(s_t),s_{t+1}=T(s_{t},a_{t},W_{t+1}),t\geq 0}
+\left[r(s_0,a_0) + \gamma \varsigma\left(
+\varrho_\infty\left(\sum_{t=1}^{\infty}\gamma^{t-1}r(s_{t},a_{t})\right)
+\right)
+\right]
+\\
+\sup_{a_0\in A(s_0)}
+\left[r(s_0,a_0) + \gamma \varsigma\left(\sup_{a_t\in A(s_t),
+s_{t+1}=T(s_{t},a_{t},W_{t+1}),t\geq 0}
+\varrho_\infty\left(\sum_{t=1}^{\infty}\gamma^{t-1}r(s_{t},a_{t})\right)
+\right)
+\right],
+\end{multline*}
+which proves the Proposition.
+\end{proof}
+
+
+\begin{theorem}
+The operator 
 \[
 B:(BV)(s)\defined\sup_{a\in A(s)}[r(s,a)+\gamma\varsigma(V(T(s,a,W))]
 \]
 is a $\gamma$ contraction w.r.t. sup norm.
-\end{proposition}
+\end{theorem}
 
 \begin{proof}
-According to TBD, $\varsigma(Z) = -\sup_{Q\in\mathcal{M}}\E_{Q(w)}Z$ for some set $\mathcal{M}$ of real probability measures.  Fix $\epsilon >0$ and, for any value function $V$, denote $a_{V,s}$ the $\epsilon$-optimal solution of $\sup_{a\in A(s)}[r(s,a)+\gamma\varsigma(V(T(s,a,W))]$. We have 
+%First recall that, from the coherency of $\sigma$, for any random element $X$ and any measurable mapping $f$, $\sigma(f(X)) = \sup_{Q\in\mathcal{M}}\int f(x)Q(dx)$ for some set $\mathcal{M}$ dependent on $\L(X)$. 
+Fix $\epsilon >0$ and, for any value function $V$, denote $a_{V,s}$ the $\epsilon$-optimal solution of $\sup_{a\in A(s)}[r(s,a)+\gamma\varsigma(V(T(s,a,W))]$. We have 
 \begin{multline*}
 \|BU-BV\|_{\infty}=\underbrace{\sup_{s\in S_{U}\defined\{s:(BU)(s)>(BV)(s))\}}[(BU)(s)-(BV)(s)]}_{b_{U}}\\
 \vee\underbrace{\sup_{s\in S_{V}\defined\{s:(BU)(s)\leq(BV)(s))\}}[(BV)(s)-(BU)(s)]}_{b_{V}}
@@ -227,16 +321,20 @@ Further we have
 b_{U}=\sup_{s\in S_{U}}|\sup_{a\in A(s)}[r(s,a)+\gamma\varsigma(U(T(s,a,W))]-\sup_{a\in A(s)}[r(s,a)+\gamma\varsigma(V(T(s,a,W))]|\\
 \leq\sup_{s\in S_{U}}[r(s,a_{U,s})+\gamma\varsigma(U(T(s,a_{U,s},W)))-r(s,a_{U,s})-\gamma\varsigma(V(T(s,a_{U,s},W)))] -  \epsilon\\
 =\gamma\sup_{s\in S_{U}}[\varsigma(U(T(s,a_{U,s},W)))-\varsigma(V(T(s,a_{U,s},W)))]  -  \epsilon \\
-=\gamma\sup_{s\in S_{U}}[-\sup_{Q\in\mathcal{M}}\E_{Q(w)}(-U(T(s,a_{U,s},w)))+\sup_{Q\in\mathcal{M}}\E_{Q(w)}(-V(T(s,a_{U,s},w)))] - \epsilon \\
-\leq\gamma\sup_{s\in S_{U}}[-\E_{Q_{V,s}(w)}(-U(T(s,a_{U,s},w)))+\E_{Q_{V,s}(w)}(-V(T(s,a_{U,s},w)))] - \epsilon \\
-\leq\gamma\sup_{s\in S_{U}}\E_{Q_{V}(w)}|U(T(s,a_{U,s},w))-V(T(s,a_{U,s},w))| - \epsilon \leq\gamma\|U-V\|_\infty - \epsilon
+=\gamma\sup_{s\in S_{U}}[-\sup_{Q\in\mathcal{M}}\int_0^1-U(T(s,a_{U,s},w))Q(w)dw+\sup_{Q\in\mathcal{M}}\int_0^1-V(T(s,a_{U,s},w))Q(w)dw] - \epsilon \\
+\leq\gamma\sup_{s\in S_{U}}[-\int_0^1 -U(T(s,a_{U,s},w))Q_{V,s}(w)dw+\int_0^1-V(T(s,a_{U,s},w))Q_{V,s}(w)dw] - \epsilon \\
+\leq\gamma\sup_{s\in S_{U}}\int_0^1|U(T(s,a_{U,s},w))-V(T(s,a_{U,s},w))|Q_{V,s}(w)dw - \epsilon \leq\gamma\|U-V\|_\infty - \epsilon
 \end{multline*}
-where $Q_{V,s}=\arg\max_{Q\in\mathcal{M}}\E_{Q(w)}(-V(T(s,a_{U,s},w)))$
-(note that $\mathcal{M}$ depends only on $\L(W)$ and the choice
-of $\sigma)$. By releasing $\epsilon$ and limit transition, we get the $b_U \leq \gamma\|U-V\|_\infty$. By making analogous steps for $b_V$, we get the Proposition.
+where $Q_{V,s}=\arg\max_{Q\in\mathcal{M}}\int_0^1-V(T(s,a_{U,s},w))Q(w)dw$
+(the last inequality holds because $Q(w)dw$ is a probability measure). By releasing $\epsilon$ and performing a limit transition, we get the $b_U \leq \gamma\|U-V\|_\infty$. By making analogous steps for $b_V$, we get the Theorem.
 \end{proof}
-let $V_0: S \rightarrow [0,\infty)$ be arbitrary and let $\theta$ be a pre-chosen precision level. Recall the well known value iteration algorithm: 
 
+\noindent Thanks to these Theorem, many solution techniques, relying on the contractiveness of the Bellman operator, work when the expectation is replaced by a coherent risk measure. Here we only demonstrate this for the well known Value Iteration Algorithm (see \cite{sutton2018reinforcement})
+
+Let $V_0: S \rightarrow [0,\infty)$ be arbitrary and let $\theta$ be a pre-chosen precision level. The Value Iteration Algorithm may be written as follows:
+\begin{center}
+\begin{minipage}{6cm}
+\begin{framed}
 \begin{algorithmic}
 \State $n \leftarrow 0$
 \Repeat
@@ -244,8 +342,11 @@ let $V_0: S \rightarrow [0,\infty)$ be arbitrary and let $\theta$ be a pre-chose
 \State $V_n \leftarrow B V_{n-1}$
 \Until $\|V_n-V_{n-1}\|_\infty \leq \theta$
 \end{algorithmic}
+\end{framed}
+\end{minipage}
+\end{center}
 
-The following result is a direct consequence of the Banach Fixed Point Theorem (see  \cite{granas2003fixed}, 1.1).
+\noindent The following result is a direct consequence of the Banach Fixed Point Theorem (see  \cite{granas2003fixed}, 1.1).
 \begin{theorem} There exists $V_\star$ solving (\ref{eq:bellman}), 
 $$
 \| V_n - V_\star \|_\infty \leq \frac{\gamma^n}{1-\gamma } \| V_1 - V_ 0 \|_\infty
@@ -256,172 +357,10 @@ for any $n$.
 The Value Iteration Algorithm stops after a finite number of steps.
 \end{corollary}
 
-\section*{References}
+\noindent {\bf Acknoledgements.} This work has been supported by grant No. GA19-11062S of the Czech Science Foundation.
 
+%\bibliographystyle{plainnat}
 \bibliography{bibliography}
 
 \end{document}
 
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\usepackage[latin9]{inputenc}
-\usepackage{amsmath}
-\usepackage{amsthm}
-\usepackage{amssymb}
-
-\makeatletter
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
-\theoremstyle{plain}
-\newtheorem{thm}{\protect\theoremname}
-\theoremstyle{plain}
-\newtheorem{prop}[thm]{\protect\propositionname}
-
-\makeatother
-
-\usepackage{babel}
-\providecommand{\propositionname}{Proposition}
-\providecommand{\theoremname}{Theorem}
-
-%\begin{document}
-\global\long\def\P{\mathbb{P}}%
-\global\long\def\N{\mathbb{N}}%
-\global\long\def\U{\mathbb{U}}%
-\global\long\def\E{\mathbb{E}}%
-\global\long\def\R{\mathbb{R}}%
-\global\long\def\G{\mathcal{G}}%
-\global\long\def\g{\mathbb{\Pi}}%
-\global\long\def\F{\mathcal{F}}%
-\global\long\def\S{\mathbb{S}}%
-\global\long\def\Q{\mathcal{Q}}%
-\global\long\def\B{\mathcal{B}}%
-\global\long\def\ND{\mathcal{N}}%
-\global\long\def\XX{\mathcal{X}}%
-\global\long\def\indep#1{{\perp\hspace{-2mm}\perp}#1}%
-\global\long\def\L{\mathcal{L}}%
-\global\long\def\var{\mathrm{var}}%
-\global\long\def\cov{\mathrm{cov}}%
-\global\long\def\charf{\mathbf{1}}%
-\global\long\def\d{\mathrm{d}}%
-\global\long\def\M{\mathcal{M}}%
-\global\long\def\Exp{\mathrm{Exp}}%
-\global\long\def\Uniform{\mathrm{U}}%
-\global\long\def\eqd{\stackrel{d}{=}}%
-\global\long\def\eqas{\stackrel{a.s.}{=}}%
-\global\long\def\X{\mathcal{X}}%
-\global\long\def\supp{\mathrm{support}}%
-\global\long\def\H{\mathcal{H}}%
-\global\long\def\Z{\mathcal{Z}}%
-\global\long\def\as{\qquad a.s.}%
-\global\long\def\on{\qquad\text{on }}%
-\global\long\def\C{\mathcal{C}}%
-\global\long\def\barxi{\overline{\xi}}%
-\global\long\def\Po{\mathrm{Po}}%
-\global\long\def\Bi{\mathrm{Bi}}%
-\global\long\def\Be{\mathrm{Be}}%
-\global\long\def\defined{\stackrel{\text{def}}{=}}%
-\global\long\def\barA{\overline{A}}%
-\global\long\def\A{\mathcal{A}}%
-\global\long\def\barx{x}%
-\global\long\def\barX{TBD}%
-\global\long\def\last{\ell}%
-\global\long\def\bary{y}%
-\global\long\def\barz{z}%
-\global\long\def\DD{\mathcal{D}}%
-
-\title{Risk Averse Dynamic Programming with infinite horizon}
-\maketitle
-
-\section{Introduction}
-
-Problem
-\[
-\max_{a\in A,s_{t+1}=T(s_{t},a_{t},W_{t+1})}\rho(\sum_{t=0}^{\infty}\gamma^{t}r_{t}(s_{t},a_{t})),
-\]
-Here,
-\begin{itemize}
-\item $W_{t}$ is a Markov stochastic process (w.l.o.g i.i.d. uniform, because
-every Markov process $X$ can be expressed as $X_{t}=f_{t}(X_{t-1},U_{t})$
-where $U$ is independent uniform)
-\item $r_{t}$ is uniformly bounded
-\item $\rho$ is a nested risk measure with respect to filtration $\F_{t}\defined\sigma(W_{t})$
-with defomed by a coherent risk mapping (denoted by $\sigma$).
-\begin{itemize}
-\item ? can we define a nested mapping with infinite horizon
-\end{itemize}
-\item $\gamma<1$, $\gamma\doteq1$
-\item $a$ is $\text{\ensuremath{\F}}_{t}$-measurable action process
-\item $A$ is an action space
-\end{itemize}
-
-\section{Bellman equation}
-
-\[
-V(s)=\max_{a\in A(s)}[r(s,a)+\gamma\sigma(V(T(s,a,W))]
-\]
-
-\begin{prop}
-The operator 
-\[
-B:(BV)(s)\defined\sup_{a\in A(s)}[r(s,a)+\gamma\sigma(V(T(s,a,W))]
-\]
-is a $\gamma$ contraction w.r.t. sup norm.
-\end{prop}
-
-\begin{proof}
-Assume optimal solution $a_{V,s}\defined\arg\max_{a\in A(s)}[r(s,a)+\gamma\sigma(U(T(s,a,W))]$
-always exists (TBD: epsilon-optimal). We have 
-\begin{multline*}
-\|BU-BV\|_{\infty}=\underbrace{\sup_{s\in S_{U}\defined\{s:(BU)(s)>(BV)(s))\}}[(BU)(s)-(BV)(s)]}_{b_{U}}\\
-\vee\underbrace{\sup_{s\in S_{V}\defined\{s:(BU)(s)\leq(BV)(s))\}}[(BV)(s)-(BU)(s)]}_{b_{V}}
-\end{multline*}
-We have
-\begin{multline*}
-b_{U}=\sup_{s\in S_{U}}|\sup_{a\in A(s)}[r(s,a)+\gamma\sigma(U(T(s,a,W))]-\sup_{a\in A(s)}[r(s,a)+\gamma\sigma(V(T(s,a,W))]|\\
-\leq\sup_{s\in S_{U}}[r(s,a_{U,s})+\gamma\sigma(U(T(s,a_{U,s},W)))-r(s,a_{U,s})-\gamma\sigma(V(T(s,a_{U,s},W)))]\\
-=\gamma\sup_{s\in S_{U}}[\sigma(U(T(s,a_{U,s},W)))-\sigma(V(T(s,a_{U,s},W)))]\\
-=\gamma\sup_{s\in S_{U}}[-\sup_{Q\in\mathcal{M}}\E_{Q(w)}(-U(T(s,a_{U,s},w)))+\sup_{Q\in\mathcal{M}}\E_{Q(w)}(-V(T(s,a_{U,s},w)))]\\
-\leq\gamma\sup_{s\in S_{U}}[-\E_{Q_{V,s}(w)}(-U(T(s,a_{U,s},w)))+\E_{Q_{V,s}(w)}(-V(T(s,a_{U,s},w)))]\\
-\leq\gamma\sup_{s\in S_{U}}\E_{Q_{V}(w)}|U(T(s,a_{U,s},w))-V(T(s,a_{U,s},w))|\leq\gamma\|U-V\|_{max}
-\end{multline*}
-where $Q_{V,s}=\arg\max_{Q\in\mathcal{M}}\E_{Q(w)}(-V(T(s,a_{U,s},w)))$
-(note that $\mathcal{M}$ depends only on $\L(W)$ and the choice
-of $\sigma)$
-\end{proof}
-
-%\end{document}
-
-\section{Approximation}
-
-Let 
-\[
-a:\text{State space\ensuremath{\rightarrow\text{Action space}}}
-\]
- be a (stationary) policy. Then the state process is 
-\[
-S_{t}^{a}=T(S_{t-1}^{a},a(S_{t-1}^{a}),W_{t})
-\]
-And the reward process
-\[
-R_{t}^{a}=r(S_{t},a(S_{t}))
-\]
-
-\begin{itemize}
-\item ? under which conditions $S^{a}$ is ergodic?
-\end{itemize}
-If $S_{t}^{a}$ is ergodic and starts with its stationary distribution
-and $R$ has somehow bonuded moments, then 
-\[
-B_{t}^{n}\rightarrow\text{Brownian motion on \ensuremath{[0,1],\qquad}}B_{t}^{n}\defined\frac{1}{\sqrt{n}}S_{\left\lceil nt\right\rceil }\qquad S_{n}=\sum_{t=1}^{n}(R_{t}^{a}-\E R_{t}^{a})
-\]
-(see CENTRAL LIMIT THEOREMS FOR ADDITIVE FUNCTIONALS OF MARKOV CHAINS
-By Michael Maxwell and Michael Woodroofe)
-\begin{itemize}
-\item ? Use Schlotter-Pichler Scaling
-\item ? However, we have discounting.... (need to redefine the scalability)
-\end{itemize}
-
-%\end{document}

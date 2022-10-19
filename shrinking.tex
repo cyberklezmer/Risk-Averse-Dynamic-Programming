@@ -1,0 +1,126 @@
+%% LyX 2.3.4.2 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[english]{article}
+\usepackage[latin9]{inputenc}
+\usepackage{textcomp}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
+\theoremstyle{definition}
+\newtheorem*{example*}{\protect\examplename}
+\theoremstyle{plain}
+\newtheorem*{lem*}{\protect\lemmaname}
+\theoremstyle{definition}
+\newtheorem*{problem*}{\protect\problemname}
+\theoremstyle{plain}
+\newtheorem*{conjecture*}{\protect\conjecturename}
+
+\makeatother
+
+\usepackage{babel}
+\providecommand{\conjecturename}{Conjecture}
+\providecommand{\examplename}{Example}
+\providecommand{\lemmaname}{Lemma}
+\providecommand{\problemname}{Problem}
+
+\begin{document}
+
+\section*{Problem}
+
+Let $\sigma_{\kappa},\text{\ensuremath{\kappa\in[0,\kappa_{0}]}}$
+be a family of support bounded risk mappings such that $\sigma_{0}=\mathbb{E}$
+and for any $X$, $\sigma_{\kappa}$ is non-decreasing continuous
+in $\kappa$. 
+\begin{example*}
+Example: Mean-risk measure: $\sigma_{\kappa}(Y)=(1-\kappa)\mathbb{E}X+\kappa s(X)$,
+$\kappa\in[0,\kappa_{0}]$ for some support bounded coherent s such
+that $s(X)\geq\mathbb{E}$X. Then, once $X\leq b$ a.s., $\sigma_{\kappa}(X)$
+is uniformly Lipschitz in $\kappa$ with constant $2b$. 
+\end{example*}
+%
+\begin{example*}
+$\mathrm{CVaR}_{\kappa}(X)=\frac{1}{1-\kappa}\int_{\kappa}^{1}F_{X}^{-1}(u)du$,
+$0\leq\kappa\leq\kappa_{0}<1$ (\textbf{jde tohle pou¸ít na nespojitá
+rozd\v{e}lení?)}, For $\kappa\rightarrow0$ $\sigma_{\kappa}$ clearly
+converges to expectation. As $CVaR$ is the mean of upper tail distribution
+(R+U CVaR for general distributions), it is clear $\sigma_{\kappa}$
+is support-bounded. Further, 
+\begin{multline*}
+\frac{\partial}{\partial\kappa}\mathrm{CVaR_{\kappa}}(X)=\frac{1}{(1-\kappa)^{2}}\int_{\kappa}^{1}F_{X}^{-1}(u)du-\frac{1}{1-\kappa}F_{X}^{-1}(\kappa)\\
+=\frac{1}{1-\kappa}[\mathrm{CVaR_{\kappa}(X)-\mathrm{VaR_{\kappa}(X)]}}
+\end{multline*}
+so for $|X|\leq b$, $\sigma_{\kappa}$ is LIpshitz with constant
+$\frac{2b}{1-\kappa_{0}}$.
+\end{example*}
+
+\subsection*{Rescaling $\kappa$}
+
+Let $Z_{t}=-\sum_{\tau=0}^{t}\gamma^{\tau}X_{\tau}$ where $X$ is
+non-negative strictly stationary with $|X_{t}|\leq b$. Clearly then
+$|Z_{t}|\leq B:=\frac{b}{1-\gamma}$ 
+
+Define $\rho_{\kappa}(Z)=\lim_{t}\rho_{\kappa}^{t}(Z_{t})$ where
+$\rho_{\kappa}^{t}$ is a nested risk measure defined by $\sigma_{\kappa}$.
+By ORL, $\rho_{\kappa}$ exists. 
+\begin{lem*}
+$\rho_{\kappa}$ is continuous non-decreasing in $\kappa$ with $\rho_{0}=-\frac{1}{1-\gamma}\mathbb{E}X_{0}$ 
+\end{lem*}
+\begin{proof}
+TBD
+\end{proof}
+Our goal is, for any $\kappa\leq\kappa_{0},$ find $\lambda$ such
+that 
+\begin{equation}
+\sigma_{\kappa}(\overline{Z})=\rho_{\lambda}(Z),\qquad\overline{Z}=\lim_{t}Z_{t}\label{eq:eq}
+\end{equation}
+Note that for $\kappa=0$ we have $\lambda=0$ (both sides are expectations)
+and that, for i.i.d $X$
+
+\[
+\rho_{\kappa}(Z)=\sigma_{\kappa}(-X_{0})+\gamma\rho_{\kappa}(Z)=\dots=\sum_{t}\gamma^{t}\sigma_{\kappa}(-X_{0})=\frac{1}{1-\gamma}\sigma_{\kappa}(-X_{0})
+\]
+which implies
+\[
+\rho_{0}(Z)=\sigma_{0}(\overline{Z}_{t})\leq\sigma_{\kappa}(\overline{Z}_{t})\leq\frac{1}{1-\gamma}\sigma_{\kappa}(-X_{0})=\rho_{\kappa}(Z)
+\]
+guaranteeing that $0\leq\lambda\leq\kappa$, so $\lambda$ can be
+found by the interval division.
+
+Note also than, once $X_{0}=X_{1}=\dots$ then $\sigma_{\kappa}(\overline{Z})=\sigma_{\kappa}(-\frac{1}{1-\gamma}X_{0})$,
+so
+\[
+\rho_{\kappa}(Z)=\sigma_{\kappa}(-X_{0}+\gamma\sigma_{\kappa}(-X_{1}|X_{0})+\dots)=\sigma_{\kappa}(-X_{0}-\gamma X_{0}\dots)=\sigma_{\kappa}(\overline{Z}),
+\]
+i.e. $\lambda=\kappa.$
+\begin{problem*}
+Is it possible that $\sigma_{\kappa}(\overline{Z})>\rho_{\kappa}(Z)$?
+\end{problem*}
+Anyway, when solving (\ref{eq:eq}), we may first check if $\sigma_{\kappa}(\overline{Z})\leq\rho_{\kappa_{0}}(Z).$
+If yes, we can find solution of (\ref{eq:eq}) by division of $[0,\kappa_{0}]$.
+If no, then no solution of (\ref{eq:eq}) exists.
+
+\subsection*{Combination with DP}
+
+Consider the same problem as in ORL, only with $\sigma_{\kappa}$
+instead of $\sigma$, i.e. indexed by $\kappa$. Assume the optimal
+policy $a_{\kappa}$ always exist and denote $V_{a}=\sum_{\tau}\gamma^{\tau}R_{\tau}^{a}$
+is the value given that policty $a$ is nused. Our goal is to find
+$\lambda$ such that $\sigma_{\kappa}(V_{a_{\lambda}})=\rho_{\lambda}(V_{a_{\lambda}})$.
+Here we suggest to proceed iteratively, i.e. to put $\lambda_{0}=\kappa$,
+compute $V_{a_{\lambda_{0}}},$find $\lambda_{1}$ such that $\sigma_{\kappa}(V_{a_{\lambda_{0}}})=\rho_{\lambda_{1}}(V_{a_{\lambda_{0}}})$,
+$\dots$ , having $\lambda_{i},$find $\lambda_{i+1}$ such that $\sigma_{\kappa}(V_{a_{\lambda_{i}}})=\rho_{\lambda_{i+1}}(V_{a_{\lambda_{i}}}),\dots.$ 
+\begin{conjecture*}
+Such algorithm converges 
+\end{conjecture*}
+\begin{proof}
+No idea how to prove it. Maybe it could help that $\rho_{\lambda}(V_{a})$
+is uniformly continuous (which is because $R_{i}$ are uniformly bounded.
+Anyway, such algorithm reminds me of ``gradient'' methods. which
+proceed in one direction first (computing $a$), then in second direction
+($\lambda),$then again $a$...
+\end{proof}
+\textasciidieresis{}
+\end{document}
